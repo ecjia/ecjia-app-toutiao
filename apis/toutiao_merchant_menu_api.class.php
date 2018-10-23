@@ -54,8 +54,8 @@ class toutiao_merchant_menu_api extends Component_Event_Api
         $menus = ecjia_merchant::make_admin_menu('toutiao', '头条', '', 3)->add_icon('fa-group')->add_purview(array('toutiao_manage'))->add_base('toutiao');
 
         $submenus = array(
-            ecjia_merchant::make_admin_menu('01_toutiao_menu', '自定义菜单', RC_Uri::url('toutiao/admin_menu/init'), 1)->add_purview('toutiao_manage')->add_icon('fa-share-alt'),
-            ecjia_merchant::make_admin_menu('02_toutiao', '今日热点', RC_Uri::url('toutiao/admin/init'), 2)->add_purview('toutiao_manage')->add_icon('fa-list-alt'),
+            ecjia_merchant::make_admin_menu('01_toutiao_menu', '自定义菜单', RC_Uri::url('toutiao/mh_menu/init'), 1)->add_purview('toutiao_manage')->add_icon('fa-share-alt'),
+            ecjia_merchant::make_admin_menu('02_toutiao', '今日热点', RC_Uri::url('toutiao/merchant/init'), 2)->add_purview('toutiao_manage')->add_icon('fa-list-alt'),
         );
 
         $menus->add_submenu($submenus);
