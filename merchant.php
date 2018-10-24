@@ -79,8 +79,14 @@ class merchant extends ecjia_merchant
 
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点'));
         $this->assign('ur_here', '今日热点列表');
-
         $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/add'), 'text' => '添加图文素材'));
+
+        $type = isset($_GET['type']) ? trim($_GET['type']) : '';
+        $this->assign('type', $type);
+
+        $list = $this->get_toutiao_list();
+        $this->assign('list', $list);
+        $this->assign('type_count', $list['count']);
 
         $this->display('toutiao_list.dwt');
     }
@@ -88,11 +94,11 @@ class merchant extends ecjia_merchant
     public function add()
     {
         $this->admin_priv('toutiao_update');
-        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点', RC_Uri::url('toutiao/merchant/init')));
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点', RC_Uri::url('toutiao/merchant/init', array('type' => 'media'))));
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('添加图文素材'));
 
         $this->assign('ur_here', '添加图文素材');
-        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init'), 'text' => '今日热点列表'));
+        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init', array('type' => 'media')), 'text' => '今日热点列表'));
         $this->assign('form_action', RC_Uri::url('toutiao/merchant/insert'));
 
         $this->display('toutiao_add.dwt');
@@ -170,13 +176,13 @@ class merchant extends ecjia_merchant
             $group_id = $id;
         }
 
-        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点', RC_Uri::url('toutiao/merchant/init')));
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点', RC_Uri::url('toutiao/merchant/init', array('type' => 'media'))));
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('图文编辑'));
         ecjia_merchant_screen::get_current_screen()->set_sidebar_display(false);
 
         $this->assign('ur_here', '图文编辑');
         $this->assign('form_action', RC_Uri::url('toutiao/merchant/update', array('id' => $id)));
-        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init'), 'text' => '今日热点列表'));
+        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init', array('type' => 'media')), 'text' => '今日热点列表'));
 
         $media_data               = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $group_id)->first();
         $media_data['real_image'] = !empty($media_data['image']) ? 1 : 0;
@@ -249,10 +255,6 @@ class merchant extends ecjia_merchant
 
     /**
      * 添加子图文
-     *
-     * 第一步，保存进数据库
-     * 第二步，删除原有单图文数据
-     * 第三步，提交新多图文数据
      */
     public function add_child_article()
     {
@@ -323,12 +325,15 @@ class merchant extends ecjia_merchant
         $id = !empty($_GET['id']) ? intval($_GET['id']) : 0;
 
         $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
-        RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->delete();
+        RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->orWhere('group_id', $id)->delete();
 
         ecjia_merchant::admin_log($info['title'], 'remove', 'news');
         return $this->showmessage(RC_Lang::get('wechat::wechat.remove_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
     }
 
+    /**
+     * 删除封面
+     */
     public function remove_file()
     {
         $this->admin_priv('toutiao_delete', ecjia::MSGTYPE_JSON);
@@ -345,6 +350,9 @@ class merchant extends ecjia_merchant
         return $this->showmessage(RC_Lang::get('wechat::wechat.remove_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
     }
 
+    /**
+     * 获取选中素材信息
+     */
     public function get_material_info()
     {
         $id                 = intval($_GET['id']);
@@ -356,6 +364,9 @@ class merchant extends ecjia_merchant
         return $this->showmessage('', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('content' => $info));
     }
 
+    /**
+     * 上传封面
+     */
     private function get_file_name($files = [], $id = 0)
     {
         if (empty($files)) {
@@ -387,6 +398,52 @@ class merchant extends ecjia_merchant
                 return array('type' => 'error', 'message' => $upload->error());
             }
         }
+    }
+
+    private function get_toutiao_list()
+    {
+        $db = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('group_id', 0);
+
+        $type = isset($_GET['type']) ? trim($_GET['type']) : '';
+
+        $start_time = RC_Time::local_mktime(0, 0, 0, RC_Time::local_date('m'), RC_Time::local_date('d'), RC_Time::local_date('Y'));
+        $end_time   = RC_Time::local_mktime(0, 0, 0, RC_Time::local_date('m'), RC_Time::local_date('d') + 1, RC_Time::local_date('Y')) - 1;
+
+        $type_count = $db->select(
+            RC_DB::raw('SUM(IF(send_time <' . $start_time . ' and send_time > ' . $end_time . ' and status = 1, 1, 0)) as send'),
+            RC_DB::raw('SUM(IF(send_time < ' . $start_time . ' and status = 1, 1, 0)) as history'),
+            RC_DB::raw('SUM(IF(status = 0, 1, 0)) as media'))->first();
+
+        $type_count['send']    = !empty($type_count['send']) ? intval($type_count['send']) : 0;
+        $type_count['history'] = !empty($type_count['history']) ? intval($type_count['history']) : 0;
+        $type_count['media']   = !empty($type_count['media']) ? intval($type_count['media']) : 0;
+
+        if (empty($type)) {
+            $db->where('send_time', '>', $start_time)->where('send_time', '<', $end_time)->where('status', 1);
+        } elseif ($type == 'history') {
+            $db->where('send_time', '<', $start_time)->where('status', 1);
+        } elseif ($type == 'media') {
+            $db->where('status', 0);
+        }
+
+        $count = $db->count();
+        $page  = new ecjia_merchant_page($count, 10, 5);
+
+        $result = $db->select('*')->take(10)->skip($page->start_id - 1)->get();
+
+        if (!empty($result)) {
+            foreach ($result as $k => $v) {
+                $result[$k]['image']    = !empty($v['image']) ? RC_Upload::upload_url($v['image']) : RC_Uri::admin_url('statics/images/nopic.png');
+                $result[$k]['children'] = RC_DB::table('merchant_news')
+                    ->where('store_id', $_SESSION['store_id'])
+                    ->where('group_id', $v['id'])
+                    ->orderBy('sort', 'asc')
+                    ->orderBy('id', 'asc')
+                    ->get();
+            }
+        }
+
+        return array('item' => $result, 'page' => $page->show(2), 'desc' => $page->page_desc(), 'count' => $type_count);
     }
 }
 

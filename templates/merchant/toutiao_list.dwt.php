@@ -43,9 +43,25 @@
 						</thead>
 						<!-- {foreach from=$list.item item=item key=key} -->
 						<tr>
-							<td>{$item.parent_img}</td>
-							<td>{$item.title}</td>
-							<td>{$item.create_time}</td>
+							<td>
+								<img src="{$item.image}" width="215" height="125" />
+							</td>
+							<td>
+								{$key+1}.{$item.title} <span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$item.click_count}次</span><br/>
+								{if $item.children}
+								{foreach from=$item.children item=val key=k}
+								{$k+2}.{$val.title} <span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$val.click_count}次</span><br/>
+								{/foreach}
+								{/if}
+								<div class="edit-list">
+									{if $type eq 'media'}
+									<a class="" href='javascript:;'>发送</a>&nbsp;|&nbsp;
+									<a class="data-pjax" href='{RC_Uri::Url("toutiao/merchant/edit", "id={$item.id}")}'>编辑</a>&nbsp;|&nbsp;
+									{/if}
+									<a data-toggle="ajaxremove" class="ajaxremove ecjiafc-red" data-msg="您确定要删除该图文素材吗？" href='{RC_Uri::url("toutiao/merchant/remove", "id={$item.id}")}' title="{lang key='system::system.drop'}">{lang key='system::system.drop'}</a>
+								</div>
+							</td>
+							<td>{RC_Time::local_date('Y-m-d H:i:s', $item.create_time)}</td>
 						</tr>
 						<!-- {foreachelse} -->
 						<tr><td class="no-records" colspan="3">{lang key='system::system.no_records'}</td></tr>
