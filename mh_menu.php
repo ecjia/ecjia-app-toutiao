@@ -52,19 +52,16 @@ class mh_menu extends ecjia_merchant
     {
         parent::__construct();
 
-        // RC_Loader::load_app_func('global');
-        // Ecjia\App\Wechat\Helper::assign_adminlog_content();
+        Ecjia\App\Toutiao\Helper::assign_adminlog_content();
 
         /* 加载全局 js/css */
         RC_Script::enqueue_script('smoke');
         RC_Script::enqueue_script('jquery-validate');
         RC_Script::enqueue_script('jquery-form');
-        RC_Script::enqueue_script('menu', RC_App::apps_url('statics/js/menu.js', __FILE__), array(), false, true);
-        RC_Style::enqueue_style('menu', RC_App::apps_url('statics/css/menu.css', __FILE__));
+        RC_Script::enqueue_script('mh_menu_js', RC_App::apps_url('statics/js/mh_menu.js', __FILE__), array(), false, true);
+        RC_Style::enqueue_style('mh_menu_css', RC_App::apps_url('statics/css/mh_menu.css', __FILE__));
 
-        RC_Script::localize_script('wechat_menus', 'js_lang', RC_Lang::get('wechat::wechat.js_lang'));
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('自定义菜单', RC_Uri::url('toutiao/mh_menu/init')));
-
         ecjia_merchant_screen::get_current_screen()->set_subject('自定义菜单');
     }
 
@@ -94,51 +91,30 @@ class mh_menu extends ecjia_merchant
     {
         $this->admin_priv('toutiao_update', ecjia::MSGTYPE_JSON);
 
-        $wechat_id = 999;
+        $store_id = $_SESSION['store_id'];
 
         $pid  = !empty($_POST['pid']) ? intval($_POST['pid']) : 0;
         $name = !empty($_POST['name']) ? trim($_POST['name']) : !empty($pid) ? '子菜单名称' : '菜单名称';
 
-        $type    = !empty($_POST['type']) ? $_POST['type'] : 'click';
-        $key     = !empty($_POST['key']) ? $_POST['key'] : '';
-        $web_url = !empty($_POST['url']) ? $_POST['url'] : '';
+        $key = !empty($_POST['key']) ? $_POST['key'] : '';
+        $url = !empty($_POST['url']) ? $_POST['url'] : '';
 
         $status = !empty($_POST['status']) ? intval($_POST['status']) : 1;
         $sort   = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
 
-        if ($type == 'view') {
-            if (!empty($web_url)) {
-                $url = $web_url;
-            }
-        } else {
-            //小程序配置信息
-            $h5_url      = RC_Uri::home_url() . '/sites/m/';
-            $weapp_appid = $_POST['weapp_appid'];
-            if (!empty($weapp_appid)) {
-                $miniprogram_config = array(
-                    'url'      => $h5_url,
-                    'appid'    => $weapp_appid,
-                    'pagepath' => 'pages/ecjia-store/ecjia',
-                );
-                $url = serialize($miniprogram_config);
-            }
-        }
-
         $data = array(
-            'wechat_id' => $wechat_id,
-            'pid'       => $pid,
-            'name'      => $name,
-            'type'      => $type,
-            'key'       => $key,
-            'url'       => $url,
-            'status'    => $status,
-            'sort'      => $sort,
+            'store_id' => $store_id,
+            'pid'      => $pid,
+            'name'     => $name,
+            'url'      => $url,
+            'status'   => $status,
+            'sort'     => $sort,
         );
-        $id = RC_DB::table('wechat_menu')->insertGetId($data);
-        $this->admin_log($_POST['name'], 'add', 'menu');
+        $id = RC_DB::table('merchant_menu')->insertGetId($data);
+        ecjia_merchant::admin_log($_POST['name'], 'add', 'menu');
 
         if (!empty($pid)) {
-            RC_DB::table('wechat_menu')->where('wechat_id', $wechat_id)->where('id', $pid)->update(array('type' => '', 'key' => '', 'url' => ''));
+            RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('id', $pid)->update(array('url' => ''));
         }
 
         $listdb = $this->get_menuslist();
@@ -152,11 +128,7 @@ class mh_menu extends ecjia_merchant
 
         $res = $this->fetch('library/toutiao_menu_menu.lbi');
 
-        if ($type == 'miniprogram') {
-            $config_url     = unserialize($data['url']);
-            $data['app_id'] = $config_url['appid'];
-        }
-        $this->assign('wechat_menus', $data);
+        $this->assign('menus', $data);
 
         $result = $this->fetch('library/toutiao_menu_sub.lbi');
         return $this->showmessage('', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('data' => $res, 'result' => $result));
@@ -167,57 +139,34 @@ class mh_menu extends ecjia_merchant
      */
     public function update()
     {
-        $this->admin_priv('wechat_menus_update', ecjia::MSGTYPE_JSON);
+        $this->admin_priv('toutiao_update', ecjia::MSGTYPE_JSON);
 
-        $wechat_id = 999;
+        $store_id = $_SESSION['store_id'];
 
-        $id      = !empty($_POST['id']) ? intval($_POST['id']) : 0;
-        $name    = !empty($_POST['name']) ? trim($_POST['name']) : '';
-        $type    = !empty($_POST['type']) ? $_POST['type'] : '';
-        $key     = !empty($_POST['key']) ? $_POST['key'] : '';
-        $web_url = !empty($_POST['url']) ? $_POST['url'] : '';
-        $status  = !empty($_POST['status']) ? intval($_POST['status']) : 0;
-        $sort    = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
+        $id     = !empty($_POST['id']) ? intval($_POST['id']) : 0;
+        $pid    = !empty($_POST['pid']) ? intval($_POST['pid']) : 0;
+        $name   = !empty($_POST['name']) ? trim($_POST['name']) : '';
+        $url    = !empty($_POST['url']) ? $_POST['url'] : '';
+        $status = !empty($_POST['status']) ? intval($_POST['status']) : 0;
+        $sort   = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
 
         if (empty($name)) {
             return $this->showmessage('菜单名称不能为空', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
 
-        if ($type == 'view') {
-            if (empty($web_url)) {
-                return $this->showmessage('外链url不能为空', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
-            } else {
-                if (strpos($web_url, 'http://') === false && strpos($web_url, 'https://') === false) {
-                    return $this->showmessage('外链url格式错误', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
-                }
-                $url = $web_url;
-            }
-        } elseif ($type == 'miniprogram') {
-            //小程序配置信息
-            $h5_url      = RC_Uri::home_url() . '/sites/m/';
-            $weapp_appid = $_POST['weapp_appid'];
-            if (empty($weapp_appid)) {
-                return $this->showmessage('请选择小程序', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
-            } else {
-                $miniprogram_config = array(
-                    'url'      => $h5_url,
-                    'appid'    => $weapp_appid,
-                    'pagepath' => 'pages/ecjia-store/ecjia',
-                );
-                $url = serialize($miniprogram_config);
-            }
+        if (!empty($pid) && empty($url)) {
+            return $this->showmessage('请输入外链url', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
+
         $data = array(
             'name'   => $name,
-            'type'   => $type,
-            'key'    => $key,
             'url'    => $url,
             'status' => $status,
             'sort'   => $sort,
         );
-        RC_DB::table('wechat_menu')->where('id', $id)->where('wechat_id', $wechat_id)->update($data);
+        RC_DB::table('merchant_menu')->where('id', $id)->where('store_id', $store_id)->update($data);
 
-        $this->admin_log($name, 'edit', 'menu');
+        ecjia_merchant::admin_log($name, 'edit', 'menu');
 
         $listdb    = $this->get_menuslist();
         $menu_list = $listdb['menu_list'];
@@ -226,21 +175,17 @@ class mh_menu extends ecjia_merchant
         $this->assign('menu_list', $menu_list);
         $this->assign('count', $count);
 
-        $info = RC_DB::table('wechat_menu')->where('id', $id)->where('wechat_id', $wechat_id)->first();
-        if ($type == 'miniprogram') {
-            $config_url     = unserialize($info['url']);
-            $info['app_id'] = $config_url['appid'];
-        }
+        $info = RC_DB::table('merchant_menu')->where('id', $id)->where('store_id', $store_id)->first();
 
-        $count = RC_DB::table('wechat_menu')->where('wechat_id', $wechat_id)->where('pid', $info['id'])->count();
+        $count = RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('pid', $info['id'])->count();
 
         $this->assign('id', $id);
         $this->assign('pid', $info['pid']);
-        $this->assign('wechat_menus', $info);
+        $this->assign('menus', $info);
 
         $res = $this->fetch('library/toutiao_menu_menu.lbi');
 
-        if ($wechat_menus['pid'] == 0 && $count != 0) {
+        if ($menus['pid'] == 0 && $count != 0) {
             $result = $this->fetch('library/toutiao_menu_second.lbi');
         } else {
             $result = $this->fetch('library/toutiao_menu_sub.lbi');
@@ -249,9 +194,30 @@ class mh_menu extends ecjia_merchant
         return $this->showmessage('保存成功', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('data' => $res, 'result' => $result));
     }
 
+    /**
+     * 删除菜单
+     */
+    public function remove()
+    {
+        $this->admin_priv('toutiao_delete', ecjia::MSGTYPE_JSON);
+
+        $store_id = $_SESSION['store_id'];
+
+        $id   = intval($_POST['id']);
+        $info = RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('id', $id)->first();
+
+        if ($info['pid'] == 0) {
+            RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('pid', $info['id'])->delete();
+        }
+        RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('id', $id)->delete();
+
+        ecjia_merchant::admin_log($info['name'], 'remove', 'menu');
+        return $this->showmessage('删除成功', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('pjaxurl' => RC_Uri::url('toutiao/mh_menu/init')));
+    }
+
     public function check()
     {
-        $wechat_id = 999;
+        $store_id = $_SESSION['store_id'];
 
         $listdb    = $this->get_menuslist();
         $menu_list = $listdb['menu_list'];
@@ -259,60 +225,28 @@ class mh_menu extends ecjia_merchant
         $id = 0;
         if (!empty($menu_list)) {
             foreach ($menu_list as $k => $v) {
-                if ($v['type'] == 'click') {
-                    if (empty($v['key']) && empty($v['sub_button'])) {
-                        $id = $v['id'];
-                        break;
-                    } else if (!empty($v['sub_button'])) {
-                        foreach ($v['sub_button'] as $key => $val) {
-                            if ($val['type'] == 'click') {
-                                if (empty($val['key'])) {
-                                    $id = $val['id'];
-                                    break;
-                                }
-                            } else if ($val['type'] == 'view' || $val['type'] == 'miniprogram') {
-                                if (empty($val['url'])) {
-                                    $id = $val['id'];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } else if (($v['type'] == 'view' || $v['type'] == 'miniprogram')) {
-                    if (empty($v['url']) && empty($v['sub_button'])) {
-                        $id = $v['id'];
-                        break;
-                    }
-                    if (!empty($v['sub_button'])) {
-                        foreach ($v['sub_button'] as $key => $val) {
-                            if ($val['type'] == 'click') {
-                                if (empty($val['key'])) {
-                                    $id = $val['id'];
-                                    break;
-                                }
-                            } else if ($val['type'] == 'view' || $val['type'] == 'miniprogram') {
-                                if (empty($val['url'])) {
-                                    $id = $val['id'];
-                                    break;
-                                }
-                            }
+                if (empty($v['url']) && empty($v['sub_button'])) {
+                    $id = $v['id'];
+                    break;
+                }
+                if (!empty($v['sub_button'])) {
+                    foreach ($v['sub_button'] as $key => $val) {
+                        if (empty($val['url'])) {
+                            $id = $val['id'];
+                            break;
                         }
                     }
                 }
             }
             $count = count($listdb['menu_list']);
-            $data  = RC_DB::table('wechat_menu')->where('wechat_id', $wechat_id)->where('id', $id)->first();
-            if ($data['type'] == 'miniprogram') {
-                $config_url     = unserialize($data['url']);
-                $data['app_id'] = $config_url['appid'];
-            }
+            $data  = RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('id', $id)->first();
 
             $this->assign('menu_list', $listdb['menu_list']);
             $this->assign('count', $count);
 
             $this->assign('id', $id);
             $this->assign('pid', $data['pid']);
-            $this->assign('wechat_menus', $data);
+            $this->assign('menus', $data);
 
             $res = $this->fetch('library/toutiao_menu_menu.lbi');
 
@@ -321,21 +255,63 @@ class mh_menu extends ecjia_merchant
         }
     }
 
+    /**
+     * 生成自定义菜单
+     */
+    public function sys_menu()
+    {
+        $this->admin_priv('toutiao_manage', ecjia::MSGTYPE_JSON);
+
+        $store_id = $_SESSION['store_id'];
+
+        $list = RC_DB::table('merchant_menu')->where('status', 1)->where('store_id', $store_id)->orderBy('sort', 'asc')->get();
+        if (empty($list)) {
+            return $this->showmessage('请添加自定义菜单或者检查菜单是否是开启状态', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        $data = array();
+        if (is_array($list)) {
+            foreach ($list as $val) {
+                if ($val['pid'] == 0) {
+                    $sub_button = array();
+                    foreach ($list as $v) {
+                        if ($v['pid'] == $val['id']) {
+                            $sub_button[] = $v;
+                        }
+                    }
+                    $val['sub_button'] = $sub_button;
+                    $data[]            = $val;
+                }
+            }
+        }
+
+        $menu = array();
+        foreach ($data as $key => $val) {
+            if (empty($val['sub_button'])) {
+                $menu[$key]['name'] = $val['name'];
+                $menu[$key]['url']  = Ecjia\App\Toutiao\Helper::html_out($val['url']);
+            } else {
+                $menu[$key]['name'] = $val['name'];
+                foreach ($val['sub_button'] as $k => $v) {
+                    $menu[$key]['sub_button'][$k]['name'] = $v['name'];
+                    $menu[$key]['sub_button'][$k]['url']  = Ecjia\App\Toutiao\Helper::html_out($v['url']);
+                }
+            }
+        }
+        return $this->showmessage('生成菜单成功', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
+    }
+
     public function get_menu_info()
     {
-        $wechat_id = 999;
+        $store_id = $_SESSION['store_id'];
 
         $id = intval($_POST['id']);
         $this->assign('id', $id);
 
-        $wechat_menus = RC_DB::table('wechat_menu')->where('wechat_id', $wechat_id)->where('id', $id)->first();
-        if ($wechat_menus['type'] == 'miniprogram') {
-            $config_url             = unserialize($wechat_menus['url']);
-            $wechat_menus['app_id'] = $config_url['appid'];
-        }
-        $this->assign('wechat_menus', $wechat_menus);
+        $menus = RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('id', $id)->first();
+        $this->assign('menus', $menus);
 
-        $count = RC_DB::table('wechat_menu')->where('wechat_id', $wechat_id)->where('pid', $wechat_menus['id'])->count();
+        $count = RC_DB::table('merchant_menu')->where('store_id', $store_id)->where('pid', $menus['id'])->count();
         if ($count != 0) {
             $data = $this->fetch('library/toutiao_menu_second.lbi');
         } else {
@@ -344,27 +320,19 @@ class mh_menu extends ecjia_merchant
         return $this->showmessage('', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('data' => $data));
     }
 
-    private function get_menuslist()
+    public function get_menuslist()
     {
-        $wechat_id = 999;
+        $store_id = $_SESSION['store_id'];
 
-        $list   = RC_DB::table('wechat_menu')->where('wechat_id', $wechat_id)->orderBy('sort', 'asc')->get();
+        $list   = RC_DB::table('merchant_menu')->where('store_id', $store_id)->orderBy('sort', 'asc')->get();
         $result = array();
 
         if (!empty($list)) {
             foreach ($list as $vo) {
-                if ($vo['type'] == 'miniprogram') {
-                    $config_url = unserialize($vo['url']);
-                    $vo['url']  = $config_url['pagepath'];
-                }
                 if ($vo['pid'] == 0) {
                     $sub_button = array();
                     foreach ($list as $val) {
                         if ($vo['id'] == $val['pid']) {
-                            if ($val['type'] == 'miniprogram') {
-                                $child_url  = unserialize($val['url']);
-                                $val['url'] = $child_url['pagepath'];
-                            }
                             $sub_button[] = $val;
                         }
                     }

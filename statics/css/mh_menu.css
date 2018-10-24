@@ -215,7 +215,7 @@ li {
     display: block;
 }
 .weixin-preview .icon_menu_dot {
-    background: url(../images/index_z354723.png) 0px -36px no-repeat;
+    background: url(../images/icon.png) 0px -36px no-repeat;
     width: 7px;
     height: 7px;
     vertical-align: middle;
@@ -224,7 +224,7 @@ li {
     margin-top: -2px;
 }
 .weixin-preview .icon14_menu_add {
-    background: url(../images/index_z354723.png) 0px 0px no-repeat;
+    background: url(../images/icon.png) 0px 0px no-repeat;
     width: 14px;
     height: 14px;
     vertical-align: middle;
@@ -232,7 +232,7 @@ li {
     margin-top: -2px;
 }
 .weixin-preview li:hover .icon14_menu_add {
-    background: url(../images/index_z354723.png) 0px 0px no-repeat;
+    background: url(../images/icon.png) 0px 0px no-repeat;
 }
 .weixin-preview .menu-item:hover {
     color: #000;
@@ -265,6 +265,11 @@ li {
     line-height: 40px;
     color: #459ae9;
     cursor: pointer;
+}
+.weixin-menu-detail .fa {
+    color: #fff;
+    font-size: 20px;
+    padding-right: 15px;
 }
 .weixin-menu-detail .menu-input-group {
     margin: 10px 0 30px 0;

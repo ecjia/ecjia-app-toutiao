@@ -44,28 +44,34 @@
 //
 //  ---------------------------------------------------------------------------------
 //
-defined('IN_ECJIA') or exit('No permission resources.');
+namespace Ecjia\App\Toutiao;
 
-class toutiao_merchant_menu_api extends Component_Event_Api
+use ecjia_admin_log;
+
+class Helper
 {
-
-    public function call(&$options)
+    /**
+     * 添加管理员记录日志操作对象
+     */
+    public static function assign_adminlog_content()
     {
-        $menus = ecjia_merchant::make_admin_menu('toutiao', '头条', '', 3)->add_icon('fa-users')->add_purview(array('toutiao_manage'))->add_base('toutiao');
+        ecjia_admin_log::instance()->add_object('menu', '头条菜单');
+    }
 
-        $submenus = array(
-            ecjia_merchant::make_admin_menu('01_toutiao_menu', '自定义菜单', RC_Uri::url('toutiao/mh_menu/init'), 1)->add_purview('toutiao_manage')->add_icon('fa-share-alt'),
-            ecjia_merchant::make_admin_menu('02_toutiao', '今日热点', RC_Uri::url('toutiao/merchant/init'), 2)->add_purview('toutiao_manage')->add_icon('fa-list-alt'),
-        );
-
-        $menus->add_submenu($submenus);
-
-        $menus = RC_Hook::apply_filters('toutiao_merchant_menu_api', $menus);
-
-        if ($menus->has_submenus()) {
-            return $menus;
+    /**
+     * html代码输出
+     * @param unknown $str
+     * @return string
+     */
+    public static function html_out($str)
+    {
+        if (function_exists('htmlspecialchars_decode')) {
+            $str = htmlspecialchars_decode($str);
+        } else {
+            $str = html_entity_decode($str);
         }
-        return false;
+        $str = stripslashes($str);
+        return $str;
     }
 }
 
