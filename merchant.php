@@ -119,10 +119,16 @@ class merchant extends ecjia_merchant
             return $this->showmessage('请输入标题', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
 
+        $result = $this->get_file_name($_FILES);
+        if ($result['type'] == 'error') {
+            return $this->showmessage($result['message'], ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
         $data = array(
             'store_id'    => $_SESSION['store_id'],
             'title'       => $title,
             'description' => $description,
+            'image'       => $result,
             'content_url' => $content_url,
             'content'     => $content,
             'sort'        => $sort,
@@ -172,20 +178,22 @@ class merchant extends ecjia_merchant
         $this->assign('form_action', RC_Uri::url('toutiao/merchant/update', array('id' => $id)));
         $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init'), 'text' => '今日热点列表'));
 
-        $media_data             = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $group_id)->first();
-        $media_data['image']    = !empty($media_data['image']) ? RC_Upload::upload_url($media_data['image']) : RC_Uri::admin_url('statics/images/nopic.png');
-        $article['articles'][0] = $media_data;
+        $media_data               = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $group_id)->first();
+        $media_data['real_image'] = !empty($media_data['image']) ? 1 : 0;
+        $media_data['image']      = !empty($media_data['image']) ? RC_Upload::upload_url($media_data['image']) : RC_Uri::admin_url('statics/images/nopic.png');
+        $article['articles'][0]   = $media_data;
 
         $db_merchant_news = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id']);
 
-        $data = $db_merchant_news->where('group_id', $group_id)->orderBy('sort', 'asc')->orderBy('id', 'desc')->get();
-
+        $data = $db_merchant_news->where('group_id', $group_id)->orderBy('sort', 'asc')->orderBy('id', 'asc')->get();
         if (!empty($data)) {
             foreach ($data as $k => $v) {
+                $v['real_image']             = $v['image'];
                 $v['image']                  = !empty($v['image']) ? RC_Upload::upload_url($v['image']) : RC_Uri::admin_url('statics/images/nopic.png');
                 $article['articles'][$k + 1] = $v;
             }
         }
+
         $this->assign('media_data', $media_data);
         $this->assign('article', $article);
         $this->assign('group_id', $group_id);
@@ -207,7 +215,6 @@ class merchant extends ecjia_merchant
         $content_url = !empty($_POST['content_url']) ? trim($_POST['content_url']) : '';
         $sort        = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
         $content     = !empty($_POST['content']) ? stripslashes($_POST['content']) : '';
-        // $index       = !empty($_POST['index']) ? intval($_POST['index']) : 0;
 
         if (empty($id)) {
             return $this->showmessage('图文素材ID不存在。', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
@@ -217,14 +224,16 @@ class merchant extends ecjia_merchant
             return $this->showmessage(RC_Lang::get('wechat::wechat.enter_images_title'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
 
-        if (empty($content)) {
-            return $this->showmessage(RC_Lang::get('wechat::wechat.enter_main_body'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        $result = $this->get_file_name($_FILES, $id);
+        if ($result['type'] == 'error') {
+            return $this->showmessage($result['message'], ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
 
         $data = array(
             'store_id'    => $_SESSION['store_id'],
             'title'       => $title,
             'description' => $description,
+            'image'       => $result,
             'content_url' => $content_url,
             'content'     => $content,
             'sort'        => $sort,
@@ -255,21 +264,21 @@ class merchant extends ecjia_merchant
         $content_url = !empty($_POST['content_url']) ? trim($_POST['content_url']) : '';
         $sort        = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
         $content     = !empty($_POST['content']) ? stripslashes($_POST['content']) : '';
-        // $index       = !empty($_POST['index']) ? intval($_POST['index']) : 0;
-        // $sort        = $index;
 
         if (empty($title)) {
             return $this->showmessage(RC_Lang::get('wechat::wechat.enter_images_title'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
 
-        if (empty($content)) {
-            return $this->showmessage(RC_Lang::get('wechat::wechat.enter_main_body'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        $result = $this->get_file_name($_FILES);
+        if ($result['type'] == 'error') {
+            return $this->showmessage($result['message'], ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
         }
 
         $data = array(
             'store_id'    => $_SESSION['store_id'],
             'title'       => $title,
             'description' => $description,
+            'image'       => $result,
             'content_url' => $content_url,
             'content'     => $content,
             'sort'        => $sort,
@@ -320,14 +329,64 @@ class merchant extends ecjia_merchant
         return $this->showmessage(RC_Lang::get('wechat::wechat.remove_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
     }
 
+    public function remove_file()
+    {
+        $this->admin_priv('toutiao_delete', ecjia::MSGTYPE_JSON);
+
+        $id   = !empty($_GET['id']) ? intval($_GET['id']) : 0;
+        $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        if (!empty($info['image'])) {
+            $disk = RC_Filesystem::disk();
+            $disk->delete(RC_Upload::upload_path() . $info['image']);
+        }
+
+        RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->update(array('image' => ''));
+
+        return $this->showmessage(RC_Lang::get('wechat::wechat.remove_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
+    }
+
     public function get_material_info()
     {
-        $id           = intval($_GET['id']);
-        $info         = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
-        $info['file'] = empty($info['file']) ? RC_Uri::admin_url('statics/images/nopic.png') : RC_Upload::upload_url($info['file']);
+        $id                 = intval($_GET['id']);
+        $info               = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        $info['real_image'] = $info['image'];
+        $info['image']      = empty($info['image']) ? RC_Uri::admin_url('statics/images/nopic.png') : RC_Upload::upload_url($info['image']);
+        $info['href']       = RC_Uri::url('toutiao/merchant/remove_file', array('id' => $id));
 
-        $info['href'] = RC_Uri::url('toutiao/merchant/remove_file', array('id' => $id));
         return $this->showmessage('', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('content' => $info));
+    }
+
+    private function get_file_name($files = [], $id = 0)
+    {
+        if (empty($files)) {
+            return array('type' => 'error', 'message' => '请上传封面');
+        }
+        $_FILES = $files;
+
+        $file_name = '';
+        if ((isset($_FILES['image']['error']) && $_FILES['image']['error'] == 0) || (!isset($_FILES['image']['error']) && isset($_FILES['image']['tmp_name']) && $_FILES['image']['tmp_name'] != 'none')) {
+            $size = $_FILES['image']['size'];
+            if ($size / 1000 > 40) {
+                return array('type' => 'error', 'message' => '图片大小不能超过40kb');
+            }
+            $upload     = RC_Upload::uploader('image', array('save_path' => 'data/toutiao', 'auto_sub_dirs' => false));
+            $image_info = $upload->upload($_FILES['image']);
+
+            if (!empty($image_info)) {
+                $file_name = $upload->get_position($image_info);
+                //删除原图片
+                if (!empty($id)) {
+                    $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+                    if (!empty($info['image'])) {
+                        $disk = RC_Filesystem::disk();
+                        $disk->delete(RC_Upload::upload_path() . $info['image']);
+                    }
+                }
+                return $file_name;
+            } else {
+                return array('type' => 'error', 'message' => $upload->error());
+            }
+        }
     }
 }
 

@@ -32,7 +32,7 @@
 									<h4 class='news_main_title title_show'>{$list.title}</h4>
 								</div>
 								<div class="edit_mask">
-									<a href="javascript:;" class="data-pjax" data-id="{$list.id}" data-href='{url path="toutiao/merchant/get_material_info" args="id={$list.id}&material=1"}'><i class="fa fa-edit"></i></a>&nbsp;&nbsp;&nbsp;
+									<a class="data-pjax" href='{url path="toutiao/merchant/edit" args="id={$list.id}"}'><i class="fa fa-edit"></i></a>&nbsp;&nbsp;&nbsp;
 								</div>
 							</div>
 							<!-- {else} -->
@@ -40,7 +40,7 @@
 								<div class="span7 news_auxiliary_title title_show">{$list.title}</div>
 								<div class="span4 thumb_image"><div>{lang key='wechat::wechat.thumbnail'}</div><div class="show_image"><img src='{$list.image}'></div></div>
 								<div class="edit_mask">
-									<a href="javascript:;" class="data-pjax" data-id="{$list.id}" data-href='{url path="toutiao/merchant/get_material_info" args="id={$list.id}&material=1"}'><i class="fa fa-edit"></i></a>&nbsp;&nbsp;&nbsp;
+									<a class="data-pjax" href='{url path="toutiao/merchant/edit" args="id={$list.id}"}'><i class="fa fa-edit"></i></a>&nbsp;&nbsp;&nbsp;
 									<a href="javascript:;" data-toggle="remove_child_material" data-url='{url path="toutiao/merchant/remove_child_article" args="id={$list.id}"}'><i class="fa fa-trash-o"></i></a>
 								</div>
 							</div>
@@ -66,14 +66,24 @@
 								<div class="form-group row">
 									<label class="col-lg-2 label-control text-right">{lang key='wechat::wechat.cover'}</label>
 									<div class="col-lg-9 controls">
-										<div class="fileupload fileupload-new" data-provides="fileupload">
-											<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px;max-height: 60px;line-height: 10px;"></div>
+										<div class="fileupload fileupload-{if $list.real_image}exists{else}new{/if}" data-provides="fileupload">
+											{if $list.real_image}
+											<div class="fileupload-{if $list.real_image}exists{else}new{/if} thumbnail image_preview" style="max-width: 60px;">
+												<img src="{$list.image}" style="width:50px; height:50px;"/>
+											</div>
+											{/if}
+											<div class="fileupload-preview fileupload-{if $list.real_image}new{else}exists{/if} thumbnail" style="max-width: 60px;max-height: 60px;line-height: 10px;"></div>
+
 											<span class="btn btn-primary btn-file btn-sm">
 												<span class="fileupload-new"><i class="fa fa-paper-clip"></i>浏览</span>
 												<span class="fileupload-exists"> 修改</span>
 												<input type="file" class="default" name="image" />
 											</span>
-											<a class="btn btn-danger btn-sm fileupload-exists" data-dismiss="fileupload" href="" >删除</a>
+											{if $list.real_image}
+											<a class="btn btn-danger btn-sm fileupload-exists" data-toggle="ajaxremove" data-msg="您确定要删除封面吗？" data-href='{url path="toutiao/merchant/remove_file" args="id={$list.id}"}'>删除</a>
+											{else}
+											<a class="btn btn-danger btn-sm fileupload-exists" data-dismiss="fileupload">删除</a>
+											{/if}
 											<span class="input-must">*</span>
 										</div>
 										<span class="help-block">{lang key='wechat::wechat.img_size900x500'}</span>

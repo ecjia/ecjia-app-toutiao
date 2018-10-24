@@ -4,7 +4,7 @@
     app.material_edit = {
         init: function() {
             app.material_edit.clone();
-            app.material_edit.edit_area();
+            // app.material_edit.edit_area();
             app.material_edit.remove_area();
             app.material_edit.form_submit();
             app.material_edit.title_show();
@@ -31,7 +31,12 @@
                 $('input[name="sort"]').val('');
                 $('input[name="author"]').val('');
                 $('textarea[name="description"]').val('');
-                $('.fileupload-preview.thumbnail').remove();
+                $('.fileupload').removeClass('fileupload-exists').addClass('fileupload-new');
+                $('.image_preview').remove();
+                $('.fileupload-preview').addClass('fileupload-exists').removeClass('fileupload-new').html('');
+                $('.fileupload').children('a').removeAttr('data-toggle').removeAttr('data-href').removeAttr('data-msg').attr({
+                    'data-dismiss': 'fileupload'
+                });
                 $('input[name="id"]').val('');
                 $('input[name="content_url"]').val('http://');
                 $('input[name="index"]').val(index - 1);
@@ -152,8 +157,6 @@
                     $('input[name="id"]').val(data.content.id);
                     $('input[name="content_url"]').val(data.content.content_url);
                     $('input[name="index"]').val(index - 1);
-                    $('.fileupload-preview.thumbnail').remove();
-                    var html = '<div class="fileupload-preview fileupload-exists thumbnail m_r10 show_cover" style="width: 50px; height: 50px; line-height: 50px;"><img src="' + data.content.file + '"></div>';
                     $("#content").children().find('iframe').contents().find('body.view').html(data.content.content);
                     var editor = UE.getEditor('content');
                     content = editor.setContent(data.content.content);
@@ -191,12 +194,14 @@
                 var a = $('.create_news').prev('.select_mobile_area').children('.edit_mask').children('a');
                 var id = a.attr('data-id');
                 var url = a.attr('data-href');
+                if (id == undefined) {
+                    return false;
+                }
                 $.get(url, id, function(data) {
                     $('input[name="title"]').val(data.content.title);
                     $('input[name="author"]').val(data.content.author);
                     $('.fileupload-preview.thumbnail').remove();
                     var html = '<div class="fileupload-preview fileupload-exists thumbnail m_r10 show_cover" style="width: 50px; height: 50px; line-height: 50px;"><img src="' + data.content.file + '"></div>';
-
                     $('textarea[name="description"]').val(data.content.description);
                     $("#content").children().find('iframe').contents().find('body.view').html(data.content.content);
                     $('textarea[name="content"]').html(data.content.content);
