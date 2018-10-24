@@ -58,8 +58,16 @@ class merchant extends ecjia_merchant
         RC_Script::enqueue_script('smoke');
         RC_Script::enqueue_script('jquery-validate');
         RC_Script::enqueue_script('jquery-form');
-        // RC_Script::enqueue_script('mh_menu_js', RC_App::apps_url('statics/js/mh_menu.js', __FILE__), array(), false, true);
-        // RC_Style::enqueue_style('mh_menu_css', RC_App::apps_url('statics/css/mh_menu.css', __FILE__));
+        RC_Script::enqueue_script('jquery-dropper', RC_App::apps_url('statics/js/dropper-upload/jquery.fs.dropper.js', __FILE__), array(), false, true);
+
+        RC_Script::enqueue_script('bootstrap-fileupload-script', dirname(RC_App::app_dir_url(__FILE__)) . '/merchant/statics/assets/bootstrap-fileupload/bootstrap-fileupload.js', array());
+        RC_Style::enqueue_style('bootstrap-fileupload', dirname(RC_App::app_dir_url(__FILE__)) . '/merchant/statics/assets/bootstrap-fileupload/bootstrap-fileupload.css', array(), false, false);
+
+        RC_Script::enqueue_script('mh_menu_js', RC_App::apps_url('statics/js/mh_menu.js', __FILE__), array(), false, true);
+
+        RC_Script::enqueue_script('mh_toutiao_js', RC_App::apps_url('statics/js/mh_toutiao.js', __FILE__), array(), false, true);
+        RC_Style::enqueue_style('mh_material_css', RC_App::apps_url('statics/css/mh_material.css', __FILE__));
+        RC_Script::localize_script('mh_toutiao_js', 'js_lang', RC_Lang::get('wechat::wechat.js_lang'));
 
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('头条', RC_Uri::url('toutiao/mh_menu/init')));
         ecjia_merchant_screen::get_current_screen()->set_parentage('toutiao', 'toutiao/mh_menu.php');
@@ -72,7 +80,254 @@ class merchant extends ecjia_merchant
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点'));
         $this->assign('ur_here', '今日热点列表');
 
+        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/add'), 'text' => '添加图文素材'));
+
         $this->display('toutiao_list.dwt');
+    }
+
+    public function add()
+    {
+        $this->admin_priv('toutiao_update');
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点', RC_Uri::url('toutiao/merchant/init')));
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('添加图文素材'));
+
+        $this->assign('ur_here', '添加图文素材');
+        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init'), 'text' => '今日热点列表'));
+        $this->assign('form_action', RC_Uri::url('toutiao/merchant/insert'));
+
+        $this->display('toutiao_add.dwt');
+    }
+
+    /**
+     * 图文添加数据插入
+     */
+    public function insert()
+    {
+        $this->admin_priv('toutiao_update', ecjia::MSGTYPE_JSON);
+
+        $id = intval($this->request->query('id', 0));
+
+        $title       = !empty($_POST['title']) ? trim($_POST['title']) : '';
+        $description = !empty($_POST['description']) ? $_POST['description'] : '';
+        $content_url = !empty($_POST['content_url']) ? trim($_POST['content_url']) : '';
+        $sort        = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
+        $content     = !empty($_POST['content']) ? stripslashes($_POST['content']) : '';
+
+        $thumb_media_id = $this->request->input('thumb_media_id');
+
+        if (empty($title)) {
+            return $this->showmessage('请输入标题', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        $data = array(
+            'store_id'    => $_SESSION['store_id'],
+            'title'       => $title,
+            'description' => $description,
+            'content_url' => $content_url,
+            'content'     => $content,
+            'sort'        => $sort,
+            'create_time' => RC_Time::gmtime(),
+        );
+
+        if ($id) {
+            $data['group_id'] = $id;
+        } else {
+            $data['group_id'] = 0;
+        }
+
+        $id = RC_DB::table('merchant_news')->insertGetId($data);
+        ecjia_merchant::admin_log($title, 'add', 'news');
+
+        $links[] = array('text' => '今日热点列表', 'href' => RC_Uri::url('toutiao/merchant/init'));
+        $links[] = array('text' => RC_Lang::get('wechat::wechat.continue_material_manage'), 'href' => RC_Uri::url('toutiao/merchant/add'));
+        return $this->showmessage(RC_Lang::get('wechat::wechat.add_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('links' => $links, 'pjaxurl' => RC_Uri::url('toutiao/merchant/edit', array('id' => $id))));
+
+    }
+
+    /**
+     * 素材编辑
+     */
+    public function edit()
+    {
+        $this->admin_priv('wechat_material_update');
+
+        $id = intval($_GET['id']);
+
+        $article = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        if (empty($article)) {
+            return $this->showmessage('该素材不存在', ecjia::MSGTYPE_HTML | ecjia::MSGSTAT_ERROR);
+        }
+
+        if ($article['group_id'] > 0) {
+            $group_id = $article['group_id'];
+        } else {
+            $group_id = $id;
+        }
+
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('今日热点', RC_Uri::url('toutiao/merchant/init')));
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('图文编辑'));
+        ecjia_merchant_screen::get_current_screen()->set_sidebar_display(false);
+
+        $this->assign('ur_here', '图文编辑');
+        $this->assign('form_action', RC_Uri::url('toutiao/merchant/update', array('id' => $id)));
+        $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/init'), 'text' => '今日热点列表'));
+
+        $media_data             = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $group_id)->first();
+        $media_data['image']    = !empty($media_data['image']) ? RC_Upload::upload_url($media_data['image']) : RC_Uri::admin_url('statics/images/nopic.png');
+        $article['articles'][0] = $media_data;
+
+        $db_merchant_news = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id']);
+
+        $data = $db_merchant_news->where('group_id', $group_id)->orderBy('sort', 'asc')->orderBy('id', 'desc')->get();
+
+        if (!empty($data)) {
+            foreach ($data as $k => $v) {
+                $v['image']                  = !empty($v['image']) ? RC_Upload::upload_url($v['image']) : RC_Uri::admin_url('statics/images/nopic.png');
+                $article['articles'][$k + 1] = $v;
+            }
+        }
+        $this->assign('media_data', $media_data);
+        $this->assign('article', $article);
+        $this->assign('group_id', $group_id);
+        $this->assign('id', $id);
+
+        $this->display('toutiao_edit.dwt');
+    }
+
+    /**
+     * 更新单篇图文素材
+     */
+    public function update()
+    {
+        $this->admin_priv('toutiao_update', ecjia::MSGTYPE_JSON);
+
+        $id          = !empty($_GET['id']) ? $_GET['id'] : 0;
+        $title       = !empty($_POST['title']) ? trim($_POST['title']) : '';
+        $description = !empty($_POST['description']) ? $_POST['description'] : '';
+        $content_url = !empty($_POST['content_url']) ? trim($_POST['content_url']) : '';
+        $sort        = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
+        $content     = !empty($_POST['content']) ? stripslashes($_POST['content']) : '';
+        // $index       = !empty($_POST['index']) ? intval($_POST['index']) : 0;
+
+        if (empty($id)) {
+            return $this->showmessage('图文素材ID不存在。', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        if (empty($title)) {
+            return $this->showmessage(RC_Lang::get('wechat::wechat.enter_images_title'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        if (empty($content)) {
+            return $this->showmessage(RC_Lang::get('wechat::wechat.enter_main_body'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        $data = array(
+            'store_id'    => $_SESSION['store_id'],
+            'title'       => $title,
+            'description' => $description,
+            'content_url' => $content_url,
+            'content'     => $content,
+            'sort'        => $sort,
+            'create_time' => RC_Time::gmtime(),
+        );
+
+        RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->update($data);
+
+        ecjia_merchant::admin_log($title, 'edit', 'new');
+
+        return $this->showmessage('编辑成功', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('pjaxurl' => RC_Uri::url('toutiao/merchant/edit', array('id' => $id))));
+    }
+
+    /**
+     * 添加子图文
+     *
+     * 第一步，保存进数据库
+     * 第二步，删除原有单图文数据
+     * 第三步，提交新多图文数据
+     */
+    public function add_child_article()
+    {
+        $this->admin_priv('toutiao_update', ecjia::MSGTYPE_JSON);
+
+        $group_id    = !empty($_GET['group_id']) ? $_GET['group_id'] : 0;
+        $title       = !empty($_POST['title']) ? trim($_POST['title']) : '';
+        $description = !empty($_POST['description']) ? $_POST['description'] : '';
+        $content_url = !empty($_POST['content_url']) ? trim($_POST['content_url']) : '';
+        $sort        = !empty($_POST['sort']) ? intval($_POST['sort']) : 0;
+        $content     = !empty($_POST['content']) ? stripslashes($_POST['content']) : '';
+        // $index       = !empty($_POST['index']) ? intval($_POST['index']) : 0;
+        // $sort        = $index;
+
+        if (empty($title)) {
+            return $this->showmessage(RC_Lang::get('wechat::wechat.enter_images_title'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        if (empty($content)) {
+            return $this->showmessage(RC_Lang::get('wechat::wechat.enter_main_body'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        $data = array(
+            'store_id'    => $_SESSION['store_id'],
+            'title'       => $title,
+            'description' => $description,
+            'content_url' => $content_url,
+            'content'     => $content,
+            'sort'        => $sort,
+            'create_time' => RC_Time::gmtime(),
+            'group_id'    => $group_id,
+        );
+
+        //添加多图文素材
+        $id = RC_DB::table('merchant_news')->insertGetId($data);
+        ecjia_merchant::admin_log($title, 'add', 'news');
+
+        return $this->showmessage(RC_Lang::get('wechat::wechat.add_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('pjaxurl' => RC_Uri::url('toutiao/merchant/edit', array('id' => $id))));
+    }
+
+    /**
+     * 移除子图文
+     */
+    public function remove_child_article()
+    {
+        $this->admin_priv('toutiao_update', ecjia::MSGTYPE_JSON);
+
+        $id = !empty($_GET['id']) ? $_GET['id'] : 0;
+        if (empty($id)) {
+            return $this->showmessage('图文素材ID不存在。', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_ERROR);
+        }
+
+        $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+
+        RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->delete();
+        ecjia_merchant::admin_log($info['title'], 'remove', 'news');
+
+        return $this->showmessage(sprintf("移除%s图文素材成功", $info['title']), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('pjaxurl' => RC_Uri::url('toutiao/merchant/edit', array('id' => $info['group_id']))));
+    }
+
+    /**
+     * 删除图文素材
+     */
+    public function remove()
+    {
+        $this->admin_priv('toutiao_delete', ecjia::MSGTYPE_JSON);
+
+        $id = !empty($_GET['id']) ? intval($_GET['id']) : 0;
+
+        $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->delete();
+
+        ecjia_merchant::admin_log($info['title'], 'remove', 'news');
+        return $this->showmessage(RC_Lang::get('wechat::wechat.remove_success'), ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
+    }
+
+    public function get_material_info()
+    {
+        $id           = intval($_GET['id']);
+        $info         = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        $info['file'] = empty($info['file']) ? RC_Uri::admin_url('statics/images/nopic.png') : RC_Upload::upload_url($info['file']);
+
+        $info['href'] = RC_Uri::url('toutiao/merchant/remove_file', array('id' => $id));
+        return $this->showmessage('', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('content' => $info));
     }
 }
 

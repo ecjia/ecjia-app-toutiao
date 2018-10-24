@@ -1,54 +1,8 @@
 // JavaScript Document
 ;
 (function(app, $) {
-    app.edit = {
-        init: function() {
-            $('input[name="type"]').off('click').on('click', function(e) {
-                if ($("input[name='type']:checked").val() == 'click') {
-                    $('#keydiv').show();
-                    $('#urldiv').hide();
-                    $('#weappdiv').hide();
-                } else if ($("input[name='type']:checked").val() == 'view') {
-                    $('#keydiv').hide();
-                    $('#urldiv').show();
-                    $('#weappdiv').hide();
-                } else {
-                    $('#keydiv').hide();
-                    $('#urldiv').hide();
-                    $('#weappdiv').show();
-                }
-            });
-            $('input[name="type"]:checked').trigger('click');
-        }
-    };
     app.menu = {
         init: function() {
-            $(".ajaxswitch").off('click').on('click', function(e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-                $.get(url, function(data) {
-                    ecjia.merchant.showmessage(data);
-                }, 'json');
-            });
-            $(".ajaxmenu").off('click').on('click', function(e) {
-                e.preventDefault();
-                var url = $(this).attr('data-url');
-                var message = $(this).attr('data-msg');
-                if (message) {
-                    smoke.confirm(message, function(e) {
-                        e && $.get(url, function(data) {
-                            ecjia.merchant.showmessage(data);
-                        }, 'json');
-                    }, {
-                        ok: '确定',
-                        cancel: '取消'
-                    });
-                } else {
-                    $.get(url, function(data) {
-                        ecjia.merchant.showmessage(data);
-                    }, 'json');
-                }
-            });
             app.menu.add();
             app.menu.edit();
             app.menu.remove();

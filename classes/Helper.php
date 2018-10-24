@@ -56,6 +56,7 @@ class Helper
     public static function assign_adminlog_content()
     {
         ecjia_admin_log::instance()->add_object('menu', '头条菜单');
+        ecjia_admin_log::instance()->add_object('news', '今日热点');
     }
 
     /**
