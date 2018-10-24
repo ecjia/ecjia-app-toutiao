@@ -61,15 +61,14 @@ class mh_menu extends ecjia_merchant
         RC_Script::enqueue_script('mh_menu_js', RC_App::apps_url('statics/js/mh_menu.js', __FILE__), array(), false, true);
         RC_Style::enqueue_style('mh_menu_css', RC_App::apps_url('statics/css/mh_menu.css', __FILE__));
 
-        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('自定义菜单', RC_Uri::url('toutiao/mh_menu/init')));
-        ecjia_merchant_screen::get_current_screen()->set_subject('自定义菜单');
+        ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('头条', RC_Uri::url('toutiao/mh_menu/init')));
+        ecjia_merchant_screen::get_current_screen()->set_parentage('toutiao', 'toutiao/mh_menu.php');
     }
 
     public function init()
     {
         $this->admin_priv('toutiao_manage');
 
-        ecjia_merchant_screen::get_current_screen()->remove_last_nav_here();
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here('自定义菜单'));
         $this->assign('ur_here', '店铺自定义菜单');
 
