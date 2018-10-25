@@ -184,30 +184,9 @@
                 });
             });
             $('[data-toggle="remove_edit_mask"]').off('click').on('click', function() {
-                var index = $(this).parents('.select_mobile_area').index();
-                $('.mobile_news_view').children().eq(index).remove();
-                $('.material_info').children().children('h4').html(js_lang.graphic + index);
-                app.material_edit.edit_area_show(index);
-                $('.create_news').show();
-                $('.material_info_select').find('.title_show').html(js_lang.title);
-                $('.material_info_select').find('.show_image').html('');
-                var a = $('.create_news').prev('.select_mobile_area').children('.edit_mask').children('a');
-                var id = a.attr('data-id');
-                var url = a.attr('data-href');
-                if (id == undefined) {
-                    return false;
-                }
-                $.get(url, id, function(data) {
-                    $('input[name="title"]').val(data.content.title);
-                    $('input[name="author"]').val(data.content.author);
-                    $('.fileupload-preview.thumbnail').remove();
-                    var html = '<div class="fileupload-preview fileupload-exists thumbnail m_r10 show_cover" style="width: 50px; height: 50px; line-height: 50px;"><img src="' + data.content.file + '"></div>';
-                    $('textarea[name="description"]').val(data.content.description);
-                    $("#content").children().find('iframe').contents().find('body.view').html(data.content.content);
-                    $('textarea[name="content"]').html(data.content.content);
-                    $('input[name="id"]').val(data.content.id);
-                    $('input[name="content_url"]').val(data.content.link);
-                }, "JSON");
+                var $this = $(this);
+                href = $this.attr('data-href');
+                ecjia.pjax(href);
             });
         },
         issue_submit: function() {

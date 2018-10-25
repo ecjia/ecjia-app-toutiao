@@ -73,7 +73,6 @@
 											</div>
 											{/if}
 											<div class="fileupload-preview fileupload-{if $list.real_image}new{else}exists{/if} thumbnail" style="max-width: 60px;max-height: 60px;line-height: 10px;"></div>
-
 											<span class="btn btn-primary btn-file btn-sm">
 												<span class="fileupload-new"><i class="fa fa-paper-clip"></i>浏览</span>
 												<span class="fileupload-exists"> 修改</span>
@@ -140,7 +139,7 @@
 	<div class="span7 news_auxiliary_title title_show">{lang key='wechat::wechat.title'}</div>
 	<div class="span4 thumb_image"><div>{lang key='wechat::wechat.thumbnail'}</div><div class="show_image"></div></div>
 	<div class="edit_mask">
-		<a href="javascript:;"><i class="fa fa-edit"></i></a>&nbsp;&nbsp;&nbsp;<a href="javascript:;" data-toggle="remove_edit_mask" data-parent=".mobile_news_auxiliary"><i class="fa fa-trash-o"></i></a>
+		<a href="javascript:;"><i class="fa fa-edit"></i></a>&nbsp;&nbsp;&nbsp;<a href="javascript:;" data-toggle="remove_edit_mask" data-parent=".mobile_news_auxiliary" data-href='{RC_Uri::Url("toutiao/merchant/edit", "id={$id}")}'><i class="fa fa-trash-o"></i></a>
 	</div>
 </div>
 <!-- {/block} -->
