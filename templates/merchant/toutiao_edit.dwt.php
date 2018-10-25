@@ -54,7 +54,7 @@
 						<!-- {foreach from=$article.articles key=key item=list}-->
 						<!-- {if $list.id eq $id} -->
 						<div class="mobile_news_edit_area">
-							<h4 class="heading">{lang key='wechat::wechat.graphic'}{$key+1}</h4>
+							<h4 class="heading new_heading">图文素材{$key+1}</h4>
 							<fieldset>
 								<div class="form-group row">
 									<label class="col-lg-2 label-control text-right">{lang key='wechat::wechat.label_title'}</label>

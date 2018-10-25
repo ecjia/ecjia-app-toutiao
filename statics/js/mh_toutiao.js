@@ -26,7 +26,7 @@
                 $('div.hide').find('checkbox').prop('disabled', true);
                 $('.create_news').hide();
                 var index = $('.select_mobile_area').length;
-                $('.material_info').children().children('h4').html(js_lang.graphic + index);
+                $('.material_info').children().children('h4').html('图文素材' + index);
                 $('input[name="title"]').val('');
                 $('input[name="sort"]').val('');
                 $('input[name="author"]').val('');
