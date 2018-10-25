@@ -68,6 +68,9 @@
 						<!-- {/foreach} -->
 					</table>
 				</section>
+				{if !$type}
+				<p class="help-block">你今日还可群发 {$residue_degree} 次消息</p>
+				{/if}
 				<!-- {$list.page} -->
 			</div>
 		</div>

@@ -89,7 +89,7 @@
 								<div class="form-group row">
 									<label class="col-lg-2 label-control text-right"></label>
 									<div class="col-lg-9 controls">
-										<input type="submit" value="{lang key='wechat::wechat.ok'}" class="btn btn-info" />
+										<input type="submit" value="存入素材库" class="btn btn-info" />
 									</div>
 								</div>
 							</fieldset>

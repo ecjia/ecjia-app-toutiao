@@ -88,6 +88,11 @@ class merchant extends ecjia_merchant
         $this->assign('list', $list);
         $this->assign('type_count', $list['count']);
 
+        $limit          = RC_Loader::load_app_config('send_limit', 'toutiao');
+        $send_limit     = $limit['send_limit'];
+        $residue_degree = $send_limit - $list['count']['send'] < 0 ? 0 : $send_limit - $list['count']['send'];
+        $this->assign('residue_degree', $residue_degree);
+
         $this->display('toutiao_list.dwt');
     }
 
@@ -204,6 +209,12 @@ class merchant extends ecjia_merchant
         $this->assign('article', $article);
         $this->assign('group_id', $group_id);
         $this->assign('id', $id);
+
+        $type_count = $this->get_type_count();
+        $limit      = RC_Loader::load_app_config('send_limit', 'toutiao');
+
+        $residue_degree = $limit['send_limit'] - $type_count['send'] < 0 ? 0 : $limit['send_limit'] - $type_count['send'];
+        $this->assign('residue_degree', $residue_degree);
 
         $this->display('toutiao_edit.dwt');
     }
@@ -406,17 +417,10 @@ class merchant extends ecjia_merchant
 
         $type = isset($_GET['type']) ? trim($_GET['type']) : '';
 
+        $type_count = $this->get_type_count();
+
         $start_time = RC_Time::local_mktime(0, 0, 0, RC_Time::local_date('m'), RC_Time::local_date('d'), RC_Time::local_date('Y'));
         $end_time   = RC_Time::local_mktime(0, 0, 0, RC_Time::local_date('m'), RC_Time::local_date('d') + 1, RC_Time::local_date('Y')) - 1;
-
-        $type_count = $db->select(
-            RC_DB::raw('SUM(IF(send_time <' . $start_time . ' and send_time > ' . $end_time . ' and status = 1, 1, 0)) as send'),
-            RC_DB::raw('SUM(IF(send_time < ' . $start_time . ' and status = 1, 1, 0)) as history'),
-            RC_DB::raw('SUM(IF(status = 0, 1, 0)) as media'))->first();
-
-        $type_count['send']    = !empty($type_count['send']) ? intval($type_count['send']) : 0;
-        $type_count['history'] = !empty($type_count['history']) ? intval($type_count['history']) : 0;
-        $type_count['media']   = !empty($type_count['media']) ? intval($type_count['media']) : 0;
 
         if (empty($type)) {
             $db->where('send_time', '>', $start_time)->where('send_time', '<', $end_time)->where('status', 1);
@@ -427,9 +431,10 @@ class merchant extends ecjia_merchant
         }
 
         $count = $db->count();
-        $page  = new ecjia_merchant_page($count, 10, 5);
+        $size  = 10;
+        $page  = new ecjia_merchant_page($count, $size, 5);
 
-        $result = $db->select('*')->take(10)->skip($page->start_id - 1)->get();
+        $result = $db->select('*')->take($size)->skip($page->start_id - 1)->get();
 
         if (!empty($result)) {
             foreach ($result as $k => $v) {
@@ -444,6 +449,25 @@ class merchant extends ecjia_merchant
         }
 
         return array('item' => $result, 'page' => $page->show(2), 'desc' => $page->page_desc(), 'count' => $type_count);
+    }
+
+    private function get_type_count()
+    {
+        $db = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('group_id', 0);
+
+        $start_time = RC_Time::local_mktime(0, 0, 0, RC_Time::local_date('m'), RC_Time::local_date('d'), RC_Time::local_date('Y'));
+        $end_time   = RC_Time::local_mktime(0, 0, 0, RC_Time::local_date('m'), RC_Time::local_date('d') + 1, RC_Time::local_date('Y')) - 1;
+
+        $type_count = $db->select(
+            RC_DB::raw('SUM(IF(send_time >' . $start_time . ' and send_time < ' . $end_time . ' and status = 1, 1, 0)) as send'),
+            RC_DB::raw('SUM(IF(send_time < ' . $start_time . ' and status = 1, 1, 0)) as history'),
+            RC_DB::raw('SUM(IF(status = 0, 1, 0)) as media'))->first();
+
+        $type_count['send']    = !empty($type_count['send']) ? intval($type_count['send']) : 0;
+        $type_count['history'] = !empty($type_count['history']) ? intval($type_count['history']) : 0;
+        $type_count['media']   = !empty($type_count['media']) ? intval($type_count['media']) : 0;
+
+        return $type_count;
     }
 }
 

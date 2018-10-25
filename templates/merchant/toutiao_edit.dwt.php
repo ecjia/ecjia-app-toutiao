@@ -119,7 +119,12 @@
 									<label class="col-lg-2 label-control text-right"></label>
 									<div class="col-lg-9 controls">
 										<input type="hidden" name="index" />
-										<input type="submit" value="{lang key='wechat::wechat.update'}" class="btn btn-info"/>
+										{if $residue_degree gt 0}
+										<input type="submit" value="发布" class="btn btn-primary"/>
+										{/if}
+										<input type="submit" value="预览" class="btn btn-primary {if $residue_degree gt 0}m_l10{/if}"/>
+										<input type="submit" value="更新素材" class="btn btn-info m_l10"/>
+										<p class="help-block m_t10">你今日还可群发 {$residue_degree} 次消息</p>
 									</div>
 								</div>
 							</fieldset>
