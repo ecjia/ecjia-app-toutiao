@@ -120,9 +120,9 @@
 									<div class="col-lg-9 controls">
 										<input type="hidden" name="index" />
 										{if $residue_degree gt 0}
-										<input type="submit" value="发布" class="btn btn-primary"/>
+										<a class="btn btn-info" data-toggle="ajaxremove" data-msg="您确定要发送该图文素材吗？" href='{RC_Uri::url("toutiao/merchant/send", "id={$id}")}'>发送</a>
 										{/if}
-										<a href='{RC_Uri::url("toutiao/mobile/preview", "id={$id}")}' target="__blank" class="btn btn-primary btn-preview{if $residue_degree gt 0}m_l10{/if}">预览</a>
+										<a href='{RC_Uri::url("toutiao/mobile/preview", "id={$id}")}' target="__blank" class="btn btn-primary btn-preview {if $residue_degree gt 0}m_l10{/if}">预览</a>
 										<input type="submit" value="存入素材库" class="btn btn-info m_l10"/>
 										<p class="help-block m_t10">你今日还可群发 {$residue_degree} 次消息</p>
 									</div>

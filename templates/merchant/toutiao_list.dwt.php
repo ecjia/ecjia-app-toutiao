@@ -55,7 +55,7 @@
 								{/if}
 								<div class="edit-list">
 									{if $type eq 'media'}
-									<a class="" href='javascript:;'>发送</a>&nbsp;|&nbsp;
+									<a data-toggle="ajaxremove" data-msg="您确定要发送该图文素材吗？" href='{RC_Uri::url("toutiao/merchant/send", "id={$item.id}")}'>发送</a>&nbsp;|&nbsp;
 									<a class="data-pjax" href='{RC_Uri::Url("toutiao/merchant/edit", "id={$item.id}")}'>编辑</a>&nbsp;|&nbsp;
 									{/if}
 									<a data-toggle="ajaxremove" class="ajaxremove ecjiafc-red" data-msg="您确定要删除该图文素材吗？" href='{RC_Uri::url("toutiao/merchant/remove", "id={$item.id}")}' title="{lang key='system::system.drop'}">{lang key='system::system.drop'}</a>

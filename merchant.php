@@ -259,7 +259,7 @@ class merchant extends ecjia_merchant
 
         RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->update($data);
 
-        ecjia_merchant::admin_log($title, 'edit', 'new');
+        ecjia_merchant::admin_log($title, 'edit', 'news');
 
         return $this->showmessage('编辑成功', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('pjaxurl' => RC_Uri::url('toutiao/merchant/edit', array('id' => $id))));
     }
@@ -385,7 +385,7 @@ class merchant extends ecjia_merchant
         }
         $_FILES = $files;
 
-        $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        $info      = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
         $file_name = '';
         if ((isset($_FILES['image']['error']) && $_FILES['image']['error'] == 0) || (!isset($_FILES['image']['error']) && isset($_FILES['image']['tmp_name']) && $_FILES['image']['tmp_name'] != 'none')) {
             $size = $_FILES['image']['size'];
@@ -410,6 +410,28 @@ class merchant extends ecjia_merchant
             $file_name = $info['image'];
             return $file_name;
         }
+    }
+
+    /**
+     * 发送素材
+     */
+    public function send()
+    {
+        $id = intval($_GET['id']);
+
+        $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
+        if (empty($info)) {
+            return $this->showmessage('该素材不存在', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS);
+        }
+
+        RC_DB::table('merchant_news')
+            ->where('store_id', $_SESSION['store_id'])
+            ->where('id', $id)
+            ->orWhere('group_id', $id)
+            ->update(array('status' => 1, 'send_time' => RC_Time::gmtime()));
+
+        ecjia_merchant::admin_log($info['title'], 'send', 'news');
+        return $this->showmessage('发送成功', ecjia::MSGTYPE_JSON | ecjia::MSGSTAT_SUCCESS, array('pjaxurl' => RC_Uri::url('toutiao/merchant/init', array('type' => 'media'))));
     }
 
     private function get_toutiao_list()
