@@ -380,11 +380,12 @@ class merchant extends ecjia_merchant
      */
     private function get_file_name($files = [], $id = 0)
     {
-        if (empty($files)) {
+        if (empty($files) && empty($id)) {
             return array('type' => 'error', 'message' => '请上传封面');
         }
         $_FILES = $files;
 
+        $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
         $file_name = '';
         if ((isset($_FILES['image']['error']) && $_FILES['image']['error'] == 0) || (!isset($_FILES['image']['error']) && isset($_FILES['image']['tmp_name']) && $_FILES['image']['tmp_name'] != 'none')) {
             $size = $_FILES['image']['size'];
@@ -397,17 +398,17 @@ class merchant extends ecjia_merchant
             if (!empty($image_info)) {
                 $file_name = $upload->get_position($image_info);
                 //删除原图片
-                if (!empty($id)) {
-                    $info = RC_DB::table('merchant_news')->where('store_id', $_SESSION['store_id'])->where('id', $id)->first();
-                    if (!empty($info['image'])) {
-                        $disk = RC_Filesystem::disk();
-                        $disk->delete(RC_Upload::upload_path() . $info['image']);
-                    }
+                if (!empty($info['image'])) {
+                    $disk = RC_Filesystem::disk();
+                    $disk->delete(RC_Upload::upload_path() . $info['image']);
                 }
                 return $file_name;
             } else {
                 return array('type' => 'error', 'message' => $upload->error());
             }
+        } else {
+            $file_name = $info['image'];
+            return $file_name;
         }
     }
 

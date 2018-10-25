@@ -25,6 +25,7 @@
                 $('div.hide').find('textarea').prop('disabled', true);
                 $('div.hide').find('checkbox').prop('disabled', true);
                 $('.create_news').hide();
+                $('.btn-preview').hide();
                 var index = $('.select_mobile_area').length;
                 $('.material_info').children().children('h4').html('图文素材' + index);
                 $('input[name="title"]').val('');
