@@ -24,7 +24,6 @@
                             $.post(url, info, function(data) {
                                 $('#weixin-menu').html(data.data);
                                 $('.weixin-menu-right-content').html(data.result);
-                                app.edit.init();
                                 app.menu.init();
                             });
                         }
@@ -36,7 +35,6 @@
                     $.post(url, info, function(data) {
                         $('#weixin-menu').html(data.data);
                         $('.weixin-menu-right-content').html(data.result);
-                        app.edit.init();
                         app.menu.init();
                     });
                 }
@@ -63,7 +61,6 @@
                         $this.parent('.menu-sub-item').addClass('current');
                     }
                     $('.weixin-menu-right-content').html(data.data);
-                    app.edit.init();
                     app.menu.init();
                 });
             });
@@ -96,7 +93,6 @@
                     if (data.id != 0) {
                         $('#weixin-menu').html(data.data);
                         $('.weixin-menu-right-content').html(data.result);
-                        app.edit.init();
                         app.menu.init();
                         $('.div-input').find('.menu-tips').removeClass('hide');
                     } else {
@@ -132,7 +128,6 @@
                                 ecjia.merchant.showmessage(data);
                                 $('#weixin-menu').html(data.data);
                                 $('.weixin-menu-right-content').html(data.result);
-                                app.edit.init();
                                 app.menu.init();
                             }
                         });
