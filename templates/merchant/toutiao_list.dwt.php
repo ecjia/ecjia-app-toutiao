@@ -47,7 +47,14 @@
 								<img src="{$item.image}" width="215" height="125" />
 							</td>
 							<td>
-								{$key+1}.{$item.title} <span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$item.click_count}次</span><br/>
+								{if $type eq ''}
+									<a href='{RC_Uri::url("toutiao/mobile/preview", "id={$item.id}")}' target="__blank">{$key+1}.{$item.title}</a>
+								{else}
+									{$key+1}.{$item.title}
+								{/if} 
+
+								<span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$item.click_count}次</span><br/>
+
 								{if $item.children}
 								{foreach from=$item.children item=val key=k}
 								{$k+2}.{$val.title} <span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$val.click_count}次</span><br/>
@@ -64,11 +71,22 @@
 							<td>{RC_Time::local_date('Y-m-d H:i:s', $item.create_time)}</td>
 						</tr>
 						<!-- {foreachelse} -->
-						<tr><td class="no-records" colspan="3">{lang key='system::system.no_records'}</td></tr>
+						<tr>
+							<td class="no-records" colspan="3" {if !$type}style="height:250px;"{/if}>
+								{if !$type}
+								<p class="help-block">你今日还可群发 {$residue_degree} 次消息</p>
+								<a class="btn btn-info data-pjax" href='{RC_Uri::url("toutiao/merchant/add")}'>去发布</a>
+								<a class="btn btn-warning data-pjax" href='{RC_Uri::url("toutiao/merchant/init", "type=media")}'>去图文素材</a><br>
+								<div class="m_t10">{lang key='system::system.no_records'}</div>
+								{else}
+								{lang key='system::system.no_records'}
+								{/if}
+							</td>
+						</tr>
 						<!-- {/foreach} -->
 					</table>
 				</section>
-				{if !$type}
+				{if !$type && $list.item}
 				<p class="help-block">你今日还可群发 {$residue_degree} 次消息</p>
 				{/if}
 				<!-- {$list.page} -->

@@ -457,7 +457,7 @@ class merchant extends ecjia_merchant
         $size  = 10;
         $page  = new ecjia_merchant_page($count, $size, 5);
 
-        $result = $db->select('*')->take($size)->skip($page->start_id - 1)->get();
+        $result = $db->select('*')->take($size)->skip($page->start_id - 1)->orderBy('id', 'desc')->get();
 
         if (!empty($result)) {
             foreach ($result as $k => $v) {
