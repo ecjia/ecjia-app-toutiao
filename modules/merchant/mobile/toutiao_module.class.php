@@ -77,7 +77,14 @@ class merchant_mobile_toutiao_module extends api_front implements api_interface 
 				"more"	=> $page_row->total_pages <= $page ? 0 : 1,
 		);
 		
-		return array('data' => $list, 'pager' => $pager);
+		$store_name = Ecjia\App\Store\StoreFranchisee::StoreName($store_id);
+		$store_logo = Ecjia\App\Store\StoreFranchisee::StoreLogo($store_id);
+		
+		$store_info = array('store_id' => $store_id, 'store_name' => $store_name, 'store_logo' => $store_logo);
+		
+		$result = array('list' => $list, 'store_info' => $store_info);
+		
+		return array('data' => $result, 'pager' => $pager);
 		
 	}
 }
