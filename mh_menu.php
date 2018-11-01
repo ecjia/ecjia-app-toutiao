@@ -83,6 +83,8 @@ class mh_menu extends ecjia_merchant
         $count = count($list['menu_list']);
         $this->assign('count', $count);
 
+        $this->assign('store_name', $_SESSION['store_name']);
+
         $this->display('toutiao_menu_list.dwt');
     }
 

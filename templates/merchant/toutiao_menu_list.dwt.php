@@ -30,7 +30,7 @@
 					<div class="weixin-preview">
 						<div class="mobile_menu_preview">
 							<div class="weixin-hd">
-								<div class="weixin-title"></div>
+								<div class="weixin-title">{$store_name}</div>
 							</div>
 							<div class="weixin-bd">
 								<ul class="weixin-menu" id="weixin-menu">

@@ -50,7 +50,7 @@ defined('IN_ECJIA') or exit('No permission resources.');
  * 今日头条每日发送限制次数
  */
 return array(
-    'send_limit' => 11,
+    'send_limit' => 1,
 );
 
 //end
