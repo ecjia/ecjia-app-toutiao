@@ -389,9 +389,9 @@ class merchant extends ecjia_merchant
         $file_name = '';
         if ((isset($_FILES['image']['error']) && $_FILES['image']['error'] == 0) || (!isset($_FILES['image']['error']) && isset($_FILES['image']['tmp_name']) && $_FILES['image']['tmp_name'] != 'none')) {
             $size = $_FILES['image']['size'];
-            if ($size / 1000 > 40) {
-                return array('type' => 'error', 'message' => '图片大小不能超过40kb');
-            }
+            // if ($size / 1000 > 40) {
+            //     return array('type' => 'error', 'message' => '图片大小不能超过40kb');
+            // }
             $upload     = RC_Upload::uploader('image', array('save_path' => 'data/toutiao', 'auto_sub_dirs' => false));
             $image_info = $upload->upload($_FILES['image']);
 
