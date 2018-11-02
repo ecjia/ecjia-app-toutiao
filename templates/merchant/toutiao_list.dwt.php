@@ -47,19 +47,17 @@
 								<img src="{$item.image}" width="215" height="125" />
 							</td>
 							<td>
-								{if $type eq ''}
-									<a href='{RC_Uri::url("toutiao/mobile/preview", "id={$item.id}")}' target="__blank">{$key+1}.{$item.title}</a>
-								{else}
-									{$key+1}.{$item.title}
-								{/if} 
-
+								<a href='{RC_Uri::url("toutiao/mobile/preview", "id={$item.id}")}' target="__blank">{$key+1}.{$item.title}</a>
+								
 								<span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$item.click_count}次</span><br/>
-
+								
 								{if $item.children}
-								{foreach from=$item.children item=val key=k}
-								{$k+2}.{$val.title} <span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$val.click_count}次</span><br/>
-								{/foreach}
+									{foreach from=$item.children item=val key=k}
+									<a href='{RC_Uri::url("toutiao/mobile/preview", "id={$val.id}")}' target="__blank">{$k+2}.{$val.title} </a>
+									<span class="m_l5 ecjiafc-blue"><i class="fa fa-eye m_r5"></i>{$val.click_count}次</span><br/>
+									{/foreach}
 								{/if}
+
 								<div class="edit-list">
 									{if $type eq 'media'}
 									<a data-toggle="ajaxremove" data-msg="您确定要发送该图文素材吗？" href='{RC_Uri::url("toutiao/merchant/send", "id={$item.id}")}'>发送</a>&nbsp;|&nbsp;
