@@ -20,7 +20,7 @@ class merchant_mobile_toutiao_module extends api_front implements api_interface 
     	}
 		
     	$db = RC_DB::table('merchant_news');
-    	$db->where('group_id', 0)->where('status', 1);
+    	$db->where('group_id', 0)->where('status', 1)->where('store_id', $store_id);
     	
 		/* 查询今日热点总数*/
 		$count = $db->count();
@@ -51,7 +51,7 @@ class merchant_mobile_toutiao_module extends api_front implements api_interface 
 						'create_time' 	=> Ecjia\App\Toutiao\ToutiaoManager::FormatedTime($val['create_time']),
 				);
 				
-				$child_result = RC_DB::table('merchant_news')->where('group_id', $val['id'])->get();
+				$child_result = RC_DB::table('merchant_news')->where('group_id', $val['id'])->where('store_id', $store_id)->get();
 				if ( !empty($child_result)) {
 					foreach ($child_result as $v) {
 						if (substr($v['image'], 0, 4) == 'http' || substr($v['image'],0, 9) == 'ecjiaopen') {
