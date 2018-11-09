@@ -47,7 +47,7 @@ class merchant_mobile_toutiao_module extends api_front implements api_interface 
 						'title'			=> $val['title'],
 						'description' 	=> $val['description'],
 						'image'			=> $image,
-						'content_url' 	=> $val['content_url'],
+						'content_url' 	=> RC_Uri::url('toutiao/mobile/preview', array('id' => $val['id'])),
 						'create_time' 	=> Ecjia\App\Toutiao\ToutiaoManager::FormatedTime($val['create_time']),
 				);
 				
@@ -65,7 +65,7 @@ class merchant_mobile_toutiao_module extends api_front implements api_interface 
 								'title'			=> $v['title'],
 								'description' 	=> $v['description'],
 								'image'			=> $child_image,
-								'content_url' 	=> $v['content_url'],
+								'content_url' 	=> RC_Uri::url('toutiao/mobile/preview', array('id' => $v['id'])),
 								'create_time' 	=> Ecjia\App\Toutiao\ToutiaoManager::FormatedTime($v['create_time']),
 						);
 					}
