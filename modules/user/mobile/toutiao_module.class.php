@@ -116,7 +116,7 @@ class user_mobile_toutiao_module extends api_front implements api_interface {
 		$pager = array(
 				"total" => $page_row->total_records,
 				"count" => $page_row->total_records,
-				"more"  => $page_row->total_pages > $page['page'] ? 1 : 0,
+				"more"  => $page_row->total_pages > $page ? 1 : 0,
 		);
 
 		return array('data' => $arr, 'pager' => $pager);
