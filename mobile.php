@@ -68,6 +68,9 @@ class mobile extends ecjia_front
         }
         $this->assign('store_qrcode', $store_qrcode);
 
+        $data['click_count'] += 1;
+        RC_DB::table('merchant_news')->where('id', $id)->update(array('click_count' => $data['click_count']));
+        
         $this->display(
             RC_Package::package('app::toutiao')->loadTemplate('front/preview.dwt', true)
         );
