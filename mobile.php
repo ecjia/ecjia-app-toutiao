@@ -58,7 +58,9 @@ class mobile extends ecjia_front
     {
         $cache_id = sprintf('%X', crc32($_SERVER['QUERY_STRING']));
 
-        if (!ecjia_front::$controller->is_cached('index.dwt', $cache_id)) {
+        $resource_name = RC_Package::package('app::toutiao')->loadTemplate('front/preview.dwt', true);
+
+        if (!ecjia_front::$controller->is_cached($resource_name, $cache_id)) {
             $id              = intval($_GET['id']);
             $data            = RC_DB::table('merchant_news')->where('id', $id)->first();
             $data['content'] = stripslashes($data['content']);
@@ -77,7 +79,7 @@ class mobile extends ecjia_front
             RC_DB::table('merchant_news')->where('id', $id)->update(array('click_count' => $data['click_count']));
         }
 
-        $this->displayAppTemplate('toutiao', 'front/preview.dwt', $cache_id);
+        $this->display($resource_name, $cache_id);
     }
 }
 // end
