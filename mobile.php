@@ -77,9 +77,7 @@ class mobile extends ecjia_front
             RC_DB::table('merchant_news')->where('id', $id)->update(array('click_count' => $data['click_count']));
         }
 
-        $this->display(
-            RC_Package::package('app::toutiao')->loadTemplate('front/preview.dwt', true)
-        );
+        $this->displayAppTemplate('front/preview.dwt', $cache_id);
     }
 }
 // end
