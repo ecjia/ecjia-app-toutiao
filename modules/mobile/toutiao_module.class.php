@@ -76,7 +76,7 @@ class mobile_toutiao_module extends api_front implements api_interface {
 						'title'					=> $row['title'],
 						'description'			=> $row['description'],
 						'image' 				=> !empty($row['image']) ? RC_Upload::upload_url($row['image']) : '',
-						'url'					=> !empty($row['content_url']) ? $row['content_url'] : '',
+						'url'					=> RC_Uri::url('toutiao/mobile/preview', array('id' => $row['id'])),
 						'formatted_send_time'	=> RC_Time::local_date('Y-m-d H:i:s', $row['send_time']),
 				);
 			}
