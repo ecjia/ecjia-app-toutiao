@@ -51,7 +51,7 @@
 											{if $list.count lt 5}
 											<li class="menu-sub-item" data-toggle="add-menu" data-pid="{$list.id}" data-count="{$list.count}">
 												<div class="menu-item-title">
-													<a class="pre_menu_link" href="javascript:void(0);" title="最多添加5个子菜单"><i class="icon14_menu_add"></i></a>
+													<a class="pre_menu_link" href="javascript:void(0);" title='{t domain="toutiao"}最多添加5个子菜单{/t}'><i class="icon14_menu_add"></i></a>
 												</div>
 											</li>
 											{/if}

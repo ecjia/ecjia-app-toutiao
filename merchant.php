@@ -78,7 +78,7 @@ class merchant extends ecjia_merchant
         $this->admin_priv('toutiao_manage');
 
         ecjia_merchant_screen::get_current_screen()->add_nav_here(new admin_nav_here(__('今日热点', 'toutiao')));
-        $this->assign('ur_here', '今日热点列表');
+        $this->assign('ur_here', __('今日热点列表', 'toutiao'));
         $this->assign('action_link', array('href' => RC_Uri::url('toutiao/merchant/add'), 'text' => __('添加图文素材', 'toutiao')));
 
         $type = isset($_GET['type']) ? trim($_GET['type']) : '';
