@@ -71,7 +71,7 @@
 								<div class="form-group row">
 									<label class="col-lg-2 label-control text-right">{t domain="toutiao"}原文链接：{/t}</label>
 									<div class="col-lg-9 controls">
-										<input name='content_url' class='span8 form-control' type='text' value='{t}http://{/t}' />
+										<input name='content_url' class='span8 form-control' type='text' value='{t domain="toutiao"}http://{/t}' />
 									</div>
 								</div>
 								<div class="form-group row sort_form">
