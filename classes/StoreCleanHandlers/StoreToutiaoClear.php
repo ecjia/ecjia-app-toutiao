@@ -40,13 +40,10 @@ class StoreToutiaoClear extends StoreCleanAbstract
      */
     public function handlePrintData()
     {
-        $text = __('店铺内所有自定义菜单全部删除', 'toutiao');
+        $text = __('店铺所有今日头条数据全部删除', 'toutiao');
         return <<<HTML
-
-<span class="controls-info w400">$text</span>
-
+<span class="controls-info w400">{$text}</span>
 HTML;
-
     }
 
     /**

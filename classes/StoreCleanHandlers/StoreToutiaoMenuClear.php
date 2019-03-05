@@ -43,7 +43,7 @@ class StoreToutiaoMenuClear extends StoreCleanAbstract
         $text = __('店铺内所有自定义菜单全部删除', 'toutiao');
         return <<<HTML
 
-<span class="controls-info w400">$text</span>
+<span class="controls-info w400">{$text}</span>
 
 HTML;
 
