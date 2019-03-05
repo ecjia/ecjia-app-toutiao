@@ -33,7 +33,7 @@ class StoreToutiaoMenuClear extends StoreCleanAbstract
      * 排序
      * @var int
      */
-    protected $sort = 107;
+    protected $sort = 28;
 
     /**
      * 数据描述及输出显示内容
