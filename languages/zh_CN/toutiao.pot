@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Ecjia App toutiao package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Ecjia App toutiao 1.27.4\n"
+"Project-Id-Version: Ecjia App toutiao 1.28.0\n"
 "Report-Msgid-Bugs-To: https://make.ecjia.com/polyglots/\n"
-"POT-Creation-Date: 2019-03-01 01:49:26+00:00\n"
+"POT-Creation-Date: 2019-03-06 09:04:44+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -36,6 +36,28 @@ msgstr ""
 
 #: apis/toutiao_merchant_purview_api.class.php:57
 msgid "头条删除"
+msgstr ""
+
+#: apis/toutiao_store_remove_cleardata_api.class.php:63
+msgid "请求接口%s参数无效"
+msgstr ""
+
+#: classes/StoreCleanHandlers/StoreToutiaoClear.php:43
+msgid "店铺所有今日头条数据全部删除"
+msgstr ""
+
+#: classes/StoreCleanHandlers/StoreToutiaoClear.php:94
+#: classes/StoreCleanHandlers/StoreToutiaoMenuClear.php:97
+msgid "店铺名是%s"
+msgstr ""
+
+#: classes/StoreCleanHandlers/StoreToutiaoClear.php:94
+#: classes/StoreCleanHandlers/StoreToutiaoMenuClear.php:97
+msgid "店铺ID是%s"
+msgstr ""
+
+#: classes/StoreCleanHandlers/StoreToutiaoMenuClear.php:43
+msgid "店铺内所有自定义菜单全部删除"
 msgstr ""
 
 #: configs/jslang.php:57
@@ -82,11 +104,11 @@ msgstr ""
 msgid "消息内容不能为空"
 msgstr ""
 
-#: configs/jslang.php:70 configs/jslang.php:147
+#: configs/jslang.php:70 configs/jslang.php:149
 msgid "确定"
 msgstr ""
 
-#: configs/jslang.php:71 configs/jslang.php:148
+#: configs/jslang.php:71 configs/jslang.php:150
 msgid "取消"
 msgstr ""
 
@@ -326,11 +348,15 @@ msgstr ""
 msgid "请输入图文标题"
 msgstr ""
 
-#: configs/jslang.php:145
+#: configs/jslang.php:142
+msgid "图文素材"
+msgstr ""
+
+#: configs/jslang.php:147
 msgid "添加子菜单后，一级菜单的内容将被清除。确定添加子菜单？"
 msgstr ""
 
-#: configs/jslang.php:146
+#: configs/jslang.php:148
 msgid "您确定要删除该菜单吗？"
 msgstr ""
 
@@ -436,12 +462,6 @@ msgstr ""
 
 #: content/apps/toutiao/templates/merchant/toutiao_list.dwt.php:27
 msgid "历史发送"
-msgstr ""
-
-#: content/apps/toutiao/templates/merchant/toutiao_list.dwt.php:30
-#: content/apps/toutiao/templates/merchant/toutiao_edit.dwt.php:57
-#: content/apps/toutiao/templates/merchant/toutiao_add.dwt.php:39
-msgid "图文素材"
 msgstr ""
 
 #: content/apps/toutiao/templates/merchant/toutiao_list.dwt.php:39
